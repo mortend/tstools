@@ -1,0 +1,18 @@
+{
+  "semi": false,
+  "singleQuote": false,
+  "printWidth": 100,
+  "trailingComma": "all",
+  "tabWidth": 4,
+  "arrowParens": "avoid",
+  "overrides": [
+    {
+      "files": ["*.json", ".prettierrc"],
+      "options": { "tabWidth": 2 }
+    },
+    {
+      "files": ["*.html", "*.css", "*.md"],
+      "options": { "tabWidth": 2 }
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "name": "tstools",
+  "private": true,
+  "description": "Collection of tiny command-line tools and frontends (monorepo)",
+  "keywords": [
+    "git",
+    "productivity",
+    "npm",
+    "node",
+    "typescript",
+    "tsx"
+  ],
+  "homepage": "https://github.com/mortend/tstools#readme",
+  "bugs": {
+    "url": "https://github.com/mortend/tstools/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mortend/tstools.git"
+  },
+  "license": "MIT",
+  "author": "mortend.co",
+  "scripts": {
+    "prettier": "prettier -w ."
+  },
+  "devDependencies": {
+    "@tsconfig/node22": "^22.0.5",
+    "@types/node": "^25.9.1",
+    "prettier": "^3.8.3",
+    "tsx": "^4.22.3",
+    "typescript": "^6.0.3"
+  }
+}
