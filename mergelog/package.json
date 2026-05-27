@@ -1,0 +1,43 @@
+{
+  "name": "mergelog",
+  "version": "1.0.0",
+  "description": "Format git log output as Markdown for merge and pull request descriptions",
+  "keywords": [
+    "git",
+    "git-log",
+    "markdown",
+    "merge-request",
+    "pull-request",
+    "changelog",
+    "cli",
+    "developer-tools",
+    "productivity"
+  ],
+  "homepage": "https://github.com/mortend/tstools/mergelog",
+  "bugs": {
+    "url": "https://github.com/mortend/tstools/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mortend/tstools.git"
+  },
+  "license": "MIT",
+  "author": "mortend.co",
+  "type": "module",
+  "bin": {
+    "mergelog": "dist/mergelog.js"
+  },
+  "scripts": {
+    "prepack": "cp ../LICENSE . && tsc",
+    "postpack": "rm -f LICENSE",
+    "test": "tsx mergelog.ts"
+  },
+  "files": [
+    "dist/*",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  }
+}
