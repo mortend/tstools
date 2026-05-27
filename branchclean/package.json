@@ -1,0 +1,42 @@
+{
+  "name": "branchclean",
+  "version": "1.0.0",
+  "description": "Clean up local git branches that become identical to the main branch after rebasing",
+  "keywords": [
+    "git",
+    "git-branch",
+    "branch",
+    "cleanup",
+    "cli",
+    "developer-tools",
+    "productivity",
+    "rebase"
+  ],
+  "homepage": "https://github.com/mortend/tstools/branchclean",
+  "bugs": {
+    "url": "https://github.com/mortend/tstools/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mortend/tstools.git"
+  },
+  "license": "MIT",
+  "author": "mortend.co",
+  "type": "module",
+  "bin": {
+    "branchclean": "dist/branchclean.js"
+  },
+  "scripts": {
+    "prepack": "cp ../LICENSE . && tsc",
+    "postpack": "rm -f LICENSE",
+    "test": "tsx branchclean.ts"
+  },
+  "files": [
+    "dist/*",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  }
+}
