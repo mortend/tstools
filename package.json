@@ -20,9 +20,14 @@
   },
   "license": "MIT",
   "author": "mortend.co",
+  "workspaces": [
+    "branchclean",
+    "mergelog"
+  ],
   "scripts": {
     "lint": "eslint .",
     "prettier": "prettier -w .",
+    "release": "tsx release.ts",
     "tsc": "tsc --noEmit"
   },
   "devDependencies": {
