@@ -128,6 +128,8 @@ function codeifyNonCodeSpan(part: string) {
             .replace(/(?<!`)\b([\w./-]*[\w-]+\.[A-Za-z0-9][A-Za-z0-9-]*)\b(?!`)/g, "`$1`")
             // Dotfiles such as .env.
             .replace(/(?<!`)(^|\s)(\.[A-Za-z0-9_-]+)(?!`)/g, "$1`$2`")
+            // Multi-word uppercase phrases such as SQL statements.
+            .replace(/(?<!`)\b([A-Z][A-Z0-9]+(?: [A-Z][A-Z0-9]+)+)\b(?!`)/g, "`$1`")
             // Environment variables, optionally including simple assignments.
             .replace(/(?<!`)\b([A-Z][A-Z0-9]+(?:_[A-Z0-9]+)+(?:=[^\s`]+)?)\b(?!`)/g, "`$1`")
             // Package scripts or namespaced identifiers such as help:plain.

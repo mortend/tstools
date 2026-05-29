@@ -48,10 +48,10 @@ next year.
 
 ### Database: Skip concurrent indexes in transactions
 
-Skip CREATE INDEX CONCURRENTLY when `Transaction.isActive()` or
+Skip `CREATE INDEX CONCURRENTLY` when `Transaction.isActive()` or
 `CurrentTransaction.get()` is active.
 
-PostgreSQL rejects CREATE INDEX CONCURRENTLY inside a transaction block.
+PostgreSQL rejects `CREATE INDEX CONCURRENTLY` inside a transaction block.
 
 ### Content: Render document attachments
 
