@@ -1,5 +1,9 @@
 # mergelog
 
+[![NPM package](https://img.shields.io/npm/v/mergelog.svg?style=flat-square)](https://www.npmjs.com/package/mergelog)
+[![NPM downloads](https://img.shields.io/npm/dt/mergelog?style=flat-square)](https://www.npmjs.com/package/mergelog)
+[![License: MIT](https://img.shields.io/github/license/mortend/tstools.svg?style=flat-square)](../LICENSE)
+
 > Format git commits as Markdown for merge and pull request descriptions
 
 ## Why

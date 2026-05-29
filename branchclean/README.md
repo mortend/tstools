@@ -1,5 +1,9 @@
 # branchclean
 
+[![NPM package](https://img.shields.io/npm/v/branchclean.svg?style=flat-square)](https://www.npmjs.com/package/branchclean)
+[![NPM downloads](https://img.shields.io/npm/dt/branchclean?style=flat-square)](https://www.npmjs.com/package/branchclean)
+[![License: MIT](https://img.shields.io/github/license/mortend/tstools.svg?style=flat-square)](../LICENSE)
+
 > Clean up local git branches that become identical to the main branch after rebasing
 
 ## Why
@@ -19,7 +23,7 @@ npm install branchclean -g
 ## Usage
 
 ```sh
-$ npx branchclean --help
+$ branchclean --help
 
 branchclean
 
@@ -46,7 +50,7 @@ Behavior
 ## Example
 
 ```sh
-$ npx branchclean --dry-run
+$ branchclean --dry-run
 
 Fetching origin...
 
