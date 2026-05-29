@@ -7,7 +7,7 @@ This also updates `bin/task-runner.ts` and `docs/usage.md`.
 
 ### Formatter: Handle nested call expressions
 
-Format `Date.parse`(`job.`startedAt`.valueOf`()) as a single inline-code expression.
+Format `Date.parse(job.startedAt.valueOf())` as a single inline-code expression.
 
 Avoid broken output like `Date.parse`(...`valueOf()`) when automatic formatting
 is enabled.
@@ -41,15 +41,15 @@ Close #1234
 
 ### UI: Use stable keys for calendar rows
 
-Use `week.format`("YYYY-[W]WW") and `day.format`("YYYY-MM-DD") as stable React keys.
+Use `week.format("YYYY-[W]WW")` and `day.format("YYYY-MM-DD")` as stable React keys.
 
 This fixes the January rollover when `weekNumber()` returns 1 for dates in the
 next year.
 
 ### Database: Skip concurrent indexes in transactions
 
-Skip CREATE INDEX CONCURRENTLY when `Transaction.isActive`() or
-`CurrentTransaction.get`() is active.
+Skip CREATE INDEX CONCURRENTLY when `Transaction.isActive()` or
+`CurrentTransaction.get()` is active.
 
 PostgreSQL rejects CREATE INDEX CONCURRENTLY inside a transaction block.
 
@@ -57,7 +57,7 @@ PostgreSQL rejects CREATE INDEX CONCURRENTLY inside a transaction block.
 
 Render PDF and text-based attachments dropped into the editor as links.
 
-This keeps `editor.saveChanges`() stable and supports `preview:plain` examples.
+This keeps `editor.saveChanges()` stable and supports `preview:plain` examples.
 
 ### Git: Detect default branch automatically
 
@@ -123,8 +123,8 @@ Do not confuse ordinary prose with package script names.
 
 ### Validation: Compare time values directly
 
-Warn when time values are compared through `Date.parse`(`ticket.`validTo`.valueOf`())
-and `Date.now`() instead of direct TimeValue comparisons.
+Warn when time values are compared through `Date.parse(ticket.validTo.valueOf())`
+and `Date.now()` instead of direct TimeValue comparisons.
 
 The rule is type-aware and supports autofix to `TimeValue()`.
 

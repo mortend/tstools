@@ -108,8 +108,22 @@ function codeify(text: string) {
 function codeifyNonCodeSpan(part: string) {
     if (part.startsWith("`") && part.endsWith("`")) return part
 
-    return (
+    const protectedExpressions: string[] = []
+    const protect = (expression: string) => {
+        protectedExpressions.push(expression)
+        return `\u0000${protectedExpressions.length - 1}\u0000`
+    }
+
+    const restore = (text: string) =>
+        text.replace(/\u0000(\d+)\u0000/g, (_match, index) => protectedExpressions[Number(index)])
+
+    return restore(
         part
+            // Function calls with one simple nested call, e.g. Date.parse(foo.valueOf()).
+            .replace(
+                /(?<!`)\b([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*\([^`\n()]*(?:[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*\([^`()\n]*\)[^`\n()]*)*\))(?!`)/g,
+                expression => protect(`\`${expression}\``),
+            )
             // Files and paths with a generic alphanumeric extension.
             .replace(/(?<!`)\b([\w./-]*[\w-]+\.[A-Za-z0-9][A-Za-z0-9-]*)\b(?!`)/g, "`$1`")
             // Dotfiles such as .env.
@@ -125,7 +139,7 @@ function codeifyNonCodeSpan(part: string) {
             // Dotted identifiers such as yEditor.saveChanges.
             .replace(/(?<!`)\b([A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)+)\b(?!`)/g, "`$1`")
             // camelCase identifiers, while avoiding all-uppercase acronyms.
-            .replace(/(?<!`)\b([a-z][A-Za-z0-9_$]*[A-Z][\w$]*)\b(?!`)/g, "`$1`")
+            .replace(/(?<!`)\b([a-z][A-Za-z0-9_$]*[A-Z][\w$]*)\b(?!`)/g, "`$1`"),
     )
 }
 
