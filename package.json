@@ -21,13 +21,19 @@
   "license": "MIT",
   "author": "mortend.co",
   "scripts": {
-    "prettier": "prettier -w ."
+    "lint": "eslint .",
+    "prettier": "prettier -w .",
+    "tsc": "tsc --noEmit"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@tsconfig/node22": "^22.0.5",
     "@types/node": "^25.9.1",
+    "eslint": "^10.4.0",
+    "globals": "^17.6.0",
     "prettier": "^3.8.3",
     "tsx": "^4.22.3",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.60.0"
   }
 }

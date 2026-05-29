@@ -45,9 +45,10 @@ function main() {
 
         checkout(currentBranch)
         console.log(`\n${colors.green}Done.${colors.reset}`)
-    } catch (err: any) {
+    } catch (err: unknown) {
         checkout(currentBranch)
-        console.error(`${colors.red}Error:${colors.reset} ${err.message}`)
+        const message = err instanceof Error ? err.message : String(err)
+        console.error(`${colors.red}Error:${colors.reset} ${message}`)
         process.exit(1)
     }
 }
