@@ -1,0 +1,199 @@
+CLI: Add dry-run mode
+
+Add --dry-run and -n flags so users can preview file changes before writing
+anything to disk.
+
+This also updates bin/task-runner.ts and docs/usage.md.
+
+===
+
+Formatter: Handle nested call expressions
+
+Format Date.parse(job.startedAt.valueOf()) as a single inline-code expression.
+
+Avoid broken output like `Date.parse`(...`valueOf()`) when automatic formatting
+is enabled.
+
+===
+
+Config: Load local environment files
+
+Load .env, .env.local and config/defaults.json before starting the development
+server.
+
+This lets npm run dev demo -- --watch work without machine-specific setup.
+
+===
+
+API: Add response metadata
+
+Expose requestId, cacheStatus and pagination.nextCursor on SearchResultDto.
+
+Also update openapi.json and src/generated/client.ts after regenerating the API.
+
+===
+
+Build: Reuse cached artifacts
+
+Allow APP_REUSE_CACHE=1 to skip rebuilding cached bundles when the source hash
+has not changed.
+
+Follow-up to abc12345
+
+===
+
+Docs: Add package badges
+
+Add npm badges, license badges and local README links for image-resize and
+csv-splitter.
+
+Close #1234
+
+===
+
+UI: Use stable keys for calendar rows
+
+Use week.format("YYYY-[W]WW") and day.format("YYYY-MM-DD") as stable React keys.
+
+This fixes the January rollover when weekNumber() returns 1 for dates in the
+next year.
+
+===
+
+Database: Skip concurrent indexes in transactions
+
+Skip CREATE INDEX CONCURRENTLY when Transaction.isActive() or
+CurrentTransaction.get() is active.
+
+PostgreSQL rejects CREATE INDEX CONCURRENTLY inside a transaction block.
+
+===
+
+Content: Render document attachments
+
+Render PDF and text-based attachments dropped into the editor as links.
+
+This keeps editor.saveChanges() stable and supports preview:plain examples.
+
+===
+
+Git: Detect default branch automatically
+
+Prefer @{upstream}, then origin/HEAD, then origin/main, origin/master, main and
+master.
+
+Avoid failing on repositories where the default branch is not origin/master.
+
+===
+
+Release: Rename package to changelog-md
+
+Rename the package and executable from git-summary to changelog-md because the
+original npm package name was unavailable.
+
+===
+
+Paths: Format source and config files
+
+Format src/index.ts, packages/web/tsconfig.json, .env and .prettierrc as code.
+
+Also format nested paths such as apps/demo/src/client.ts.
+
+===
+
+Formatter: Keep all-uppercase words plain
+
+Do not format VAT, PDF, API, URL, DB, HTML or CSS as code.
+
+Still format NODE_OPTIONS, APP_REUSE_CACHE=1 and SERVER_PORT.
+
+===
+
+Tests: Add fixture mode
+
+Document changelog-md --file test/input.txt and changelog-md -f test/input.txt
+for local formatter testing without reading from Git history.
+
+===
+
+Worker: Restart after clean shutdown
+
+Restart the background worker when it exits with code 0 after importing a data
+snapshot.
+
+Do not restart when canRestart is false.
+
+===
+
+Lint: Avoid shadowing item variable
+
+Rename the inner item variable to selectedItem when rendering list badges.
+
+This avoids @typescript-eslint/no-shadow in strict projects.
+
+===
+
+CLI: Preserve existing inline code
+
+Do not add extra backticks around existing `TimeValue()`, `Date.now()` or
+`src/tools/check.ts` spans.
+
+Also avoid changing headings such as ### Existing heading in commit bodies.
+
+===
+
+CLI: Format command flags and scripts
+
+Format -r, --rebuild, --no-cache and --clipboard as inline code.
+
+Also format package scripts such as help:plain, lint:fix and test:unit.
+
+===
+
+Parser: Support namespaced identifiers
+
+Format project:sync, admin:users and cache:clear as inline code in generated
+release notes.
+
+Do not confuse ordinary prose with package script names.
+
+===
+
+Validation: Compare time values directly
+
+Warn when time values are compared through Date.parse(ticket.validTo.valueOf())
+and Date.now() instead of direct TimeValue comparisons.
+
+The rule is type-aware and supports autofix to TimeValue().
+
+===
+
+Storage: Normalize uploaded filenames
+
+Normalize invoice-final.PDF, profile-photo.JPG and data-export.JSON before
+storing them in uploads/archive.
+
+Keep the original filename in metadata.originalName.
+
+===
+
+CI: Add smoke test workflow
+
+Run npm run lint, npm run tsc and npm test on pull requests.
+
+The workflow uses NODE_OPTIONS=--max-old-space-size=4096 for larger projects.
+
+===
+
+Network: Improve retry logging
+
+Log retryAttempt, request.url and response.status when fetchWithRetry() fails.
+
+This makes intermittent API errors easier to debug.
+
+===
+
+Plain: Leave normal prose mostly alone
+
+This commit message intentionally contains normal words, punctuation and short
+sentences that should not receive inline code formatting.
