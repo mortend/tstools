@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { execFileSync } from "node:child_process"
+import { readFileSync } from "node:fs"
 
 const colors = {
     bold: "\x1b[1m",
@@ -18,16 +19,19 @@ if (args.includes("-h") || args.includes("--help")) {
     process.exit(0)
 }
 
+const filePath = readOption("-f", "--file")
+const arg = args.find(arg => !arg.startsWith("-") && arg !== filePath)
+
 const autoCode = !args.includes("-C") && !args.includes("--no-code")
 const clipboard = args.includes("-c") || args.includes("--clipboard")
-const arg = args.find(x => !x.startsWith("-"))
 
 main()
 
 /** Format git commits as Markdown for merge/pull request descriptions. */
 function main() {
-    const range = resolveRange(arg)
-    const log = git(["log", range, "--reverse", "--format=%x1e%B%x1f"], { showErrors: true })
+    const log = filePath
+        ? readCommitLogFile(filePath)
+        : git(["log", resolveRange(arg), "--reverse", "--format=%x1e%B%x1f"], { showErrors: true })
     const markdown = formatCommits(log)
 
     if (clipboard) {
@@ -35,6 +39,34 @@ function main() {
     } else {
         console.log(markdown)
     }
+}
+
+/** Reads commit log input from a raw git log file or a readable test fixture. */
+function readCommitLogFile(filePath: string) {
+    const text = readFileSync(filePath, "utf8")
+
+    if (text.includes("\x1e") || text.includes("\x1f")) return text
+
+    return text
+        .split(/^={3,}\s*$/m)
+        .map(commit => commit.trim())
+        .filter(Boolean)
+        .map(commit => `\x1e${commit}\x1f`)
+        .join("")
+}
+
+/** Reads an option value from either --name=value or --name value syntax. */
+function readOption(shortName: string, longName: string) {
+    const valueArg = args.find(arg => arg.startsWith(`${longName}=`))
+    if (valueArg) return valueArg.slice(longName.length + 1)
+
+    const shortIndex = args.indexOf(shortName)
+    if (shortIndex !== -1) return args[shortIndex + 1]
+
+    const longIndex = args.indexOf(longName)
+    if (longIndex !== -1) return args[longIndex + 1]
+
+    return undefined
 }
 
 /** Resolves a user argument to a git log range. */
@@ -173,11 +205,13 @@ ${colors.bold}Usage${colors.reset}
   ${colors.green}mergelog${colors.reset} ${colors.yellow}origin/main..HEAD${colors.reset}
   ${colors.green}mergelog${colors.reset} ${colors.yellow}3 --no-code${colors.reset}
   ${colors.green}mergelog${colors.reset} ${colors.yellow}3 --clipboard${colors.reset}
+  ${colors.green}mergelog${colors.reset} ${colors.yellow}--file input.txt${colors.reset}
 
 ${colors.bold}Options${colors.reset}
   ${colors.yellow}-h, --help${colors.reset}       Show this help screen
   ${colors.yellow}-C, --no-code${colors.reset}    Disable automatic backticks
   ${colors.yellow}-c, --clipboard${colors.reset}  Copy Markdown to the clipboard
+  ${colors.yellow}-f, --file${colors.reset}       Read raw git log output or a test fixture from a file
 
 ${colors.bold}Defaults${colors.reset}
   No range:        detected upstream/default branch .. HEAD
