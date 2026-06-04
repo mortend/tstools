@@ -22,7 +22,7 @@ if (args.includes("-h") || args.includes("--help")) {
 const filePath = readOption("-f", "--file")
 const arg = args.find(arg => !arg.startsWith("-") && arg !== filePath)
 
-const autoCode = !args.includes("-C") && !args.includes("--no-code")
+const autoCode = args.includes("-b") || args.includes("--backticks")
 const clipboard = args.includes("-c") || args.includes("--clipboard")
 
 main()
@@ -219,13 +219,13 @@ ${colors.bold}Usage${colors.reset}
   ${colors.green}mergelog${colors.reset}
   ${colors.green}mergelog${colors.reset} ${colors.yellow}3${colors.reset}
   ${colors.green}mergelog${colors.reset} ${colors.yellow}origin/main..HEAD${colors.reset}
-  ${colors.green}mergelog${colors.reset} ${colors.yellow}3 --no-code${colors.reset}
+  ${colors.green}mergelog${colors.reset} ${colors.yellow}3 --backticks${colors.reset}
   ${colors.green}mergelog${colors.reset} ${colors.yellow}3 --clipboard${colors.reset}
   ${colors.green}mergelog${colors.reset} ${colors.yellow}--file input.txt${colors.reset}
 
 ${colors.bold}Options${colors.reset}
   ${colors.yellow}-h, --help${colors.reset}       Show this help screen
-  ${colors.yellow}-C, --no-code${colors.reset}    Disable automatic backticks
+  ${colors.yellow}-b, --backticks${colors.reset}  Enable automatic backticks
   ${colors.yellow}-c, --clipboard${colors.reset}  Copy Markdown to the clipboard
   ${colors.yellow}-f, --file${colors.reset}       Read raw git log output or a test fixture from a file
 

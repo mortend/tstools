@@ -30,8 +30,8 @@
   "scripts": {
     "prepack": "cp ../LICENSE . && tsc",
     "postpack": "rm -f LICENSE",
-    "test": "tsx mergelog.ts -f test/input.txt | diff -u test/expected.txt -",
-    "test:update": "tsx mergelog.ts -f test/input.txt > test/expected.txt"
+    "test": "tsx mergelog.ts -b -f test/input.txt | diff -u test/expected.txt -",
+    "test:update": "tsx mergelog.ts -b -f test/input.txt > test/expected.txt"
   },
   "files": [
     "dist/*",
