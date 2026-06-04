@@ -16,6 +16,9 @@ const args = process.argv.slice(2)
 const dryRun = args.includes("-n") || args.includes("--dry-run")
 const fetchOrigin = !args.includes("--no-fetch")
 
+type BranchStatus = "deleted" | "would-delete" | "kept" | "failed"
+type BranchResult = { branch: string; status: BranchStatus }
+
 if (args.includes("-h") || args.includes("--help")) {
     help()
     process.exit(0)
@@ -28,6 +31,7 @@ function main() {
     const currentBranch = git(["rev-parse", "--abbrev-ref", "HEAD"])
     const mainRef = getDefaultMainRef()
     const mainBranch = mainRef.replace(/^origin\//, "")
+    const results: BranchResult[] = []
 
     try {
         if (fetchOrigin && mainRef.startsWith("origin/")) {
@@ -38,12 +42,12 @@ function main() {
         const branches = getLocalBranches().filter(
             branch => branch !== currentBranch && branch !== mainBranch,
         )
-
         for (const branch of branches) {
-            processBranch(branch, currentBranch, mainRef)
+            results.push(processBranch(branch, currentBranch, mainRef))
         }
 
         checkout(currentBranch)
+        printSummary(results)
         console.log(`\n${colors.green}Done.${colors.reset}`)
     } catch (err: unknown) {
         checkout(currentBranch)
@@ -54,13 +58,13 @@ function main() {
 }
 
 /** Checks one branch and deletes it when it matches the main ref after rebase. */
-function processBranch(branch: string, currentBranch: string, mainRef: string) {
+function processBranch(branch: string, currentBranch: string, mainRef: string): BranchResult {
     console.log(
         `\n${colors.bold}Processing branch:${colors.reset} ${colors.cyan}${branch}${colors.reset}`,
     )
     checkout(branch)
 
-    if (!tryRebase(mainRef)) return
+    if (!tryRebase(mainRef)) return { branch, status: "failed" }
 
     const head = git(["rev-parse", "HEAD"])
     const main = git(["rev-parse", mainRef])
@@ -70,12 +74,38 @@ function processBranch(branch: string, currentBranch: string, mainRef: string) {
         console.log(
             `${colors.green}${branch} matches ${mainRef}.${colors.reset} ${colors.yellow}${dryRun ? "Would delete." : "Deleting..."}${colors.reset}`,
         )
-
         if (!dryRun) git(["branch", "-D", branch], { showOutput: true })
-        return
+        return { branch, status: dryRun ? "would-delete" : "deleted" }
     }
 
     console.log(`${colors.dim}${branch} still differs from ${mainRef}. Keeping it.${colors.reset}`)
+    return { branch, status: "kept" }
+}
+
+/** Prints a summary of all processed branches. */
+function printSummary(results: BranchResult[]) {
+    if (results.length === 0) return
+
+    const deleted = results.filter(result => result.status === "deleted")
+    const wouldDelete = results.filter(result => result.status === "would-delete")
+    const failed = results.filter(result => result.status === "failed")
+    const kept = results.filter(result => result.status === "kept")
+
+    console.log(`\n${colors.bold}Summary${colors.reset}`)
+    printSummaryGroup("Deleted", deleted, colors.green)
+    printSummaryGroup("Would delete", wouldDelete, colors.yellow)
+    printSummaryGroup("Failed", failed, colors.red)
+    printSummaryGroup("Kept", kept, colors.dim)
+}
+
+/** Prints one summary group. */
+function printSummaryGroup(label: string, results: BranchResult[], color: string) {
+    if (results.length === 0) return
+
+    console.log(`${color}${label}:${colors.reset}`)
+    for (const result of results) {
+        console.log(`  * ${result.branch}`)
+    }
 }
 
 /** Rebases the current branch and aborts if the rebase fails. */
