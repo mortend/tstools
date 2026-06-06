@@ -19,6 +19,11 @@ if (hasFlag("h", "help")) {
     process.exit(0)
 }
 
+if (hasFlag("v", "version")) {
+    console.log(getPackageVersion())
+    process.exit(0)
+}
+
 const filePath = readOption("f", "file")
 const arg = args.find(arg => !arg.startsWith("-") && arg !== filePath)
 
@@ -76,6 +81,17 @@ function hasFlag(shortName: string, longName: string) {
         if (!arg.startsWith("-") || arg.startsWith("--")) return false
         return arg.slice(1).includes(shortName)
     })
+}
+
+/** Reads the package version from package.json in source or built form. */
+function getPackageVersion() {
+    for (const path of ["./package.json", "../package.json"]) {
+        try {
+            return JSON.parse(readFileSync(new URL(path, import.meta.url), "utf8")).version
+        } catch {}
+    }
+
+    throw new Error("Could not read version from package.json.")
 }
 
 /** Resolves a user argument to a git log range. */
@@ -234,6 +250,7 @@ ${colors.bold}Usage${colors.reset}
 
 ${colors.bold}Options${colors.reset}
   ${colors.yellow}-h, --help${colors.reset}       Show this help screen
+  ${colors.yellow}-v, --version${colors.reset}    Print the current package version
   ${colors.yellow}-b, --backticks${colors.reset}  Enable automatic backticks
   ${colors.yellow}-c, --clipboard${colors.reset}  Copy Markdown to the clipboard
   ${colors.yellow}-f, --file${colors.reset}       Read raw git log output or a test fixture from a file
