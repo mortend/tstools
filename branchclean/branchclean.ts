@@ -18,7 +18,7 @@ const dryRun = hasFlag("n", "dry-run")
 const fetchOrigin = !hasFlag("F", "no-fetch")
 
 type BranchStatus = "deleted" | "would-delete" | "kept" | "failed"
-type BranchResult = { branch: string; status: BranchStatus }
+type BranchResult = { branch: string; status: BranchStatus; reason?: string }
 
 if (hasFlag("h", "help")) {
     help()
@@ -88,24 +88,34 @@ function processBranch(branch: string, currentBranch: string, mainRef: string): 
     console.log(
         `\n${colors.bold}Processing branch:${colors.reset} ${colors.cyan}${branch}${colors.reset}`,
     )
-    checkout(branch)
+    try {
+        checkout(branch)
 
-    if (!tryRebase(mainRef)) return { branch, status: "failed" }
+        if (!tryRebase(mainRef))
+            return { branch, status: "failed", reason: `rebase onto ${mainRef} failed` }
 
-    const head = git(["rev-parse", "HEAD"])
-    const main = git(["rev-parse", mainRef])
+        const head = git(["rev-parse", "HEAD"])
+        const main = git(["rev-parse", mainRef])
 
-    if (head === main) {
-        checkout(currentBranch)
+        if (head === main) {
+            checkout(currentBranch)
+            console.log(
+                `${colors.green}${branch} matches ${mainRef}.${colors.reset} ${colors.yellow}${dryRun ? "Would delete." : "Deleting..."}${colors.reset}`,
+            )
+            if (!dryRun) git(["branch", "-D", branch], { showOutput: true })
+            return { branch, status: dryRun ? "would-delete" : "deleted" }
+        }
+
         console.log(
-            `${colors.green}${branch} matches ${mainRef}.${colors.reset} ${colors.yellow}${dryRun ? "Would delete." : "Deleting..."}${colors.reset}`,
+            `${colors.dim}${branch} still differs from ${mainRef}. Keeping it.${colors.reset}`,
         )
-        if (!dryRun) git(["branch", "-D", branch], { showOutput: true })
-        return { branch, status: dryRun ? "would-delete" : "deleted" }
+        return { branch, status: "kept" }
+    } catch (err: unknown) {
+        tryCheckout(currentBranch)
+        const message = err instanceof Error ? err.message : String(err)
+        console.log(`${colors.red}Failed:${colors.reset} ${message}`)
+        return { branch, status: "failed", reason: message }
     }
-
-    console.log(`${colors.dim}${branch} still differs from ${mainRef}. Keeping it.${colors.reset}`)
-    return { branch, status: "kept" }
 }
 
 /** Prints a summary of all processed branches. */
@@ -130,7 +140,8 @@ function printSummaryGroup(label: string, results: BranchResult[], color: string
 
     console.log(`${color}${label}:${colors.reset}`)
     for (const result of results) {
-        console.log(`  * ${result.branch}`)
+        const suffix = result.reason ? ` ${colors.dim}(${result.reason})${colors.reset}` : ""
+        console.log(`  * ${result.branch}${suffix}`)
     }
 }
 
@@ -173,6 +184,13 @@ function getDefaultMainRef() {
 /** Checks out a branch. */
 function checkout(branch: string) {
     git(["checkout", branch], { showOutput: true })
+}
+
+/** Checks out a branch and ignores failures. */
+function tryCheckout(branch: string) {
+    try {
+        checkout(branch)
+    } catch {}
 }
 
 /** Returns true if the given git ref exists locally. */
