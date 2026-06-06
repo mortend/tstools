@@ -29,6 +29,7 @@ const arg = args.find(arg => !arg.startsWith("-") && arg !== filePath)
 
 const autoCode = hasFlag("b", "backticks")
 const clipboard = hasFlag("c", "clipboard")
+const reverse = !hasFlag("R", "no-reverse")
 
 main()
 
@@ -36,7 +37,10 @@ main()
 function main() {
     const log = filePath
         ? readCommitLogFile(filePath)
-        : git(["log", resolveRange(arg), "--reverse", "--format=%x1e%B%x1f"], { showErrors: true })
+        : git(
+              ["log", resolveRange(arg), ...(reverse ? ["--reverse"] : []), "--format=%x1e%B%x1f"],
+              { showErrors: true },
+          )
     const markdown = formatCommits(log)
 
     if (clipboard) {
@@ -245,6 +249,7 @@ ${colors.bold}Usage${colors.reset}
   ${colors.green}mergelog${colors.reset} ${colors.yellow}3${colors.reset}
   ${colors.green}mergelog${colors.reset} ${colors.yellow}origin/main..HEAD${colors.reset}
   ${colors.green}mergelog${colors.reset} ${colors.yellow}3 --backticks${colors.reset}
+  ${colors.green}mergelog${colors.reset} ${colors.yellow}3 --no-reverse${colors.reset}
   ${colors.green}mergelog${colors.reset} ${colors.yellow}3 --clipboard${colors.reset}
   ${colors.green}mergelog${colors.reset} ${colors.yellow}--file input.txt${colors.reset}
 
@@ -254,10 +259,12 @@ ${colors.bold}Options${colors.reset}
   ${colors.yellow}-b, --backticks${colors.reset}  Enable automatic backticks
   ${colors.yellow}-c, --clipboard${colors.reset}  Copy Markdown to the clipboard
   ${colors.yellow}-f, --file${colors.reset}       Read raw git log output or a test fixture from a file
+  ${colors.yellow}-R, --no-reverse${colors.reset}  Keep Git's default reverse-chronological order
 
 ${colors.bold}Defaults${colors.reset}
   No range:        detected upstream/default branch .. HEAD
   Number argument: last N commits, e.g. ${colors.yellow}3${colors.reset} -> ${colors.yellow}-3${colors.reset}
+  Commit order:    oldest first unless ${colors.yellow}--no-reverse${colors.reset} is set
 
 ${colors.bold}Output${colors.reset}
   ### Commit subject
