@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { execFileSync } from "node:child_process"
+import { readFileSync } from "node:fs"
 
 export const colors = {
     bold: "\x1b[1m",
@@ -13,18 +14,43 @@ export const colors = {
 }
 
 const args = process.argv.slice(2)
-const dryRun = args.includes("-n") || args.includes("--dry-run")
-const fetchOrigin = !args.includes("--no-fetch")
+const dryRun = hasFlag("n", "dry-run")
+const fetchOrigin = !hasFlag("F", "no-fetch")
 
 type BranchStatus = "deleted" | "would-delete" | "kept" | "failed"
 type BranchResult = { branch: string; status: BranchStatus }
 
-if (args.includes("-h") || args.includes("--help")) {
+if (hasFlag("h", "help")) {
     help()
     process.exit(0)
 }
 
+if (hasFlag("v", "version")) {
+    console.log(getPackageVersion())
+    process.exit(0)
+}
+
 main()
+
+/** Returns true for a short flag, including grouped forms like -vn, or a long flag. */
+function hasFlag(shortName: string, longName: string) {
+    return args.some(arg => {
+        if (arg === `--${longName}`) return true
+        if (!arg.startsWith("-") || arg.startsWith("--")) return false
+        return arg.slice(1).includes(shortName)
+    })
+}
+
+/** Reads the package version from package.json in source or built form. */
+function getPackageVersion() {
+    for (const path of ["./package.json", "../package.json"]) {
+        try {
+            return JSON.parse(readFileSync(new URL(path, import.meta.url), "utf8")).version
+        } catch {}
+    }
+
+    throw new Error("Could not read version from package.json.")
+}
 
 /** Deletes local branches that become identical to the main branch after rebase. */
 function main() {
@@ -189,9 +215,10 @@ ${colors.bold}Usage${colors.reset}
   ${colors.green}branchclean${colors.reset} ${colors.yellow}--no-fetch${colors.reset}
 
 ${colors.bold}Options${colors.reset}
-  ${colors.yellow}-h, --help${colors.reset}     Show this help screen
-  ${colors.yellow}-n, --dry-run${colors.reset}  Show branches that would be deleted
-  ${colors.yellow}--no-fetch${colors.reset}     Skip fetching origin before scanning
+  ${colors.yellow}-h, --help${colors.reset}      Show this help screen
+  ${colors.yellow}-v, --version${colors.reset}   Print the current package version
+  ${colors.yellow}-n, --dry-run${colors.reset}   Show branches that would be deleted
+  ${colors.yellow}-F, --no-fetch${colors.reset}  Skip fetching origin before scanning
 
 ${colors.bold}Behavior${colors.reset}
   * Detects the main branch from ${colors.yellow}origin/HEAD${colors.reset}
