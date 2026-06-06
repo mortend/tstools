@@ -14,16 +14,16 @@ const colors = {
 
 const args = process.argv.slice(2)
 
-if (args.includes("-h") || args.includes("--help")) {
+if (hasFlag("h", "help")) {
     help()
     process.exit(0)
 }
 
-const filePath = readOption("-f", "--file")
+const filePath = readOption("f", "file")
 const arg = args.find(arg => !arg.startsWith("-") && arg !== filePath)
 
-const autoCode = args.includes("-b") || args.includes("--backticks")
-const clipboard = args.includes("-c") || args.includes("--clipboard")
+const autoCode = hasFlag("b", "backticks")
+const clipboard = hasFlag("c", "clipboard")
 
 main()
 
@@ -57,16 +57,25 @@ function readCommitLogFile(filePath: string) {
 
 /** Reads an option value from either --name=value or --name value syntax. */
 function readOption(shortName: string, longName: string) {
-    const valueArg = args.find(arg => arg.startsWith(`${longName}=`))
-    if (valueArg) return valueArg.slice(longName.length + 1)
+    const valueArg = args.find(arg => arg.startsWith(`--${longName}=`))
+    if (valueArg) return valueArg.slice(longName.length + 3)
 
-    const shortIndex = args.indexOf(shortName)
+    const shortIndex = args.indexOf(`-${shortName}`)
     if (shortIndex !== -1) return args[shortIndex + 1]
 
-    const longIndex = args.indexOf(longName)
+    const longIndex = args.indexOf(`--${longName}`)
     if (longIndex !== -1) return args[longIndex + 1]
 
     return undefined
+}
+
+/** Returns true for a short flag, including grouped forms like -bc, or a long flag. */
+function hasFlag(shortName: string, longName: string) {
+    return args.some(arg => {
+        if (arg === `--${longName}`) return true
+        if (!arg.startsWith("-") || arg.startsWith("--")) return false
+        return arg.slice(1).includes(shortName)
+    })
 }
 
 /** Resolves a user argument to a git log range. */
