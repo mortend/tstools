@@ -1,6 +1,6 @@
 {
   "name": "branchclean",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Clean up local git branches that become identical to the main branch after rebasing",
   "keywords": [
     "git",
