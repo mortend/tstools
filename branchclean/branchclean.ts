@@ -19,6 +19,15 @@ const fetchOrigin = !hasFlag("F", "no-fetch")
 
 type BranchStatus = "deleted" | "would-delete" | "kept" | "failed"
 type BranchResult = { branch: string; status: BranchStatus; reason?: string }
+type CleanupState = {
+    originalBranch?: string
+    currentBranch?: string
+    results: BranchResult[]
+    isCleaningUp: boolean
+    summaryPrinted: boolean
+}
+
+const cleanupState: CleanupState = { results: [], isCleaningUp: false, summaryPrinted: false }
 
 if (hasFlag("h", "help")) {
     help()
@@ -55,9 +64,14 @@ function getPackageVersion() {
 /** Deletes local branches that become identical to the main branch after rebase. */
 function main() {
     const currentBranch = git(["rev-parse", "--abbrev-ref", "HEAD"])
+    cleanupState.originalBranch = currentBranch
+    cleanupState.currentBranch = currentBranch
+    cleanupState.results = []
+    cleanupState.summaryPrinted = false
+    installSignalHandlers()
+
     const mainRef = getDefaultMainRef()
     const mainBranch = mainRef.replace(/^origin\//, "")
-    const results: BranchResult[] = []
 
     try {
         if (fetchOrigin && mainRef.startsWith("origin/")) {
@@ -69,14 +83,14 @@ function main() {
             branch => branch !== currentBranch && branch !== mainBranch,
         )
         for (const branch of branches) {
-            results.push(processBranch(branch, currentBranch, mainRef))
+            cleanupState.results.push(processBranch(branch, currentBranch, mainRef))
         }
 
         checkout(currentBranch)
-        printSummary(results)
+        printAndMarkSummary()
         console.log(`\n${colors.green}Done.${colors.reset}`)
     } catch (err: unknown) {
-        checkout(currentBranch)
+        restoreOriginalBranch()
         const message = err instanceof Error ? err.message : String(err)
         console.error(`${colors.red}Error:${colors.reset} ${message}`)
         process.exit(1)
@@ -184,6 +198,7 @@ function getDefaultMainRef() {
 /** Checks out a branch. */
 function checkout(branch: string) {
     git(["checkout", branch], { showOutput: true })
+    cleanupState.currentBranch = branch
 }
 
 /** Checks out a branch and ignores failures. */
@@ -219,6 +234,38 @@ function git(args: string[], options: { showOutput?: boolean } = {}) {
     })
 
     return typeof output === "string" ? output.trim() : ""
+}
+
+/** Installs signal handlers that restore the original branch before exiting. */
+function installSignalHandlers() {
+    process.on("SIGINT", () => {
+        printAndMarkSummary()
+        console.error(`\n${colors.yellow}Interrupted.${colors.reset} Restoring original branch...`)
+        restoreOriginalBranch()
+        process.exit(130)
+    })
+}
+
+/** Restores the original branch and aborts any in-progress rebase. */
+function restoreOriginalBranch() {
+    if (cleanupState.isCleaningUp) return
+    cleanupState.isCleaningUp = true
+
+    tryGit(["rebase", "--abort"], { showOutput: true })
+
+    const originalBranch = cleanupState.originalBranch
+    if (originalBranch && cleanupState.currentBranch !== originalBranch) {
+        tryCheckout(originalBranch)
+    }
+
+    cleanupState.isCleaningUp = false
+}
+
+/** Prints the summary at most once. */
+function printAndMarkSummary() {
+    if (cleanupState.summaryPrinted) return
+    cleanupState.summaryPrinted = true
+    printSummary(cleanupState.results)
 }
 
 /** Prints command usage and options. */
