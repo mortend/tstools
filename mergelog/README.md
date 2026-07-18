@@ -28,23 +28,29 @@ $ mergelog --help
 
 mergelog
 
-Format git commits as Markdown for merge/pull request descriptions.
+Format git log output as Markdown for merge and pull request descriptions.
 
 Usage
   mergelog
   mergelog 3
   mergelog origin/main..HEAD
-  mergelog 3 --no-code
+  mergelog 3 --backticks
+  mergelog 3 --no-reverse
   mergelog 3 --clipboard
+  mergelog --file input.txt
 
 Options
   -h, --help       Show this help screen
-  -C, --no-code    Disable automatic backticks
+  -v, --version    Print the current package version
+  -b, --backticks  Enable automatic backticks
   -c, --clipboard  Copy Markdown to the clipboard
+  -f, --file       Read raw git log output or a test fixture from a file
+  -R, --no-reverse  Keep Git's default reverse-chronological order
 
 Defaults
   No range:        detected upstream/default branch .. HEAD
   Number argument: last N commits, e.g. 3 -> -3
+  Commit order:    oldest first unless --no-reverse is set
 
 Output
   ### Commit subject
