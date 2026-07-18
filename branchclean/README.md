@@ -35,9 +35,10 @@ Usage
   branchclean --no-fetch
 
 Options
-  -h, --help     Show this help screen
-  -n, --dry-run  Show branches that would be deleted
-  --no-fetch     Skip fetching origin before scanning
+  -h, --help      Show this help screen
+  -v, --version   Print the current package version
+  -n, --dry-run   Show branches that would be deleted
+  -F, --no-fetch  Skip fetching origin before scanning
 
 Behavior
   * Detects the main branch from origin/HEAD
